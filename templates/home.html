@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %} Home {% endblock %}
+{% block head %} 
+    {{super()}}
+    <script>
+        function displayNone(alert) {
+            alert.style.display = "none"
+        }
+        function removeAlert(){
+            alerts = document.getElementsByClassName("alertSuccess");
+            for(let alert of alerts){
+                alert.classList.add("hide");
+                setTimeout(function(){ displayNone(alert) }, 200);
+            }
+        }
+        function overlay_on(){
+            // image_path = event.target.parentElement.previousElementSibling.getAttribute("src");
+            let images_info = JSON.parse('{{images_info | tojson}}')
+            let cur_image_path = "";
+            console.log(images_info)
+            if (event.target.tagName == 'SPAN') 
+                cur_image_path = event.target.parentElement.parentElement.previousElementSibling.getAttribute("src");
+            else if (event.target.tagName == 'IMG')
+                cur_image_path = event.target.parentElement.parentElement.parentElement.previousElementSibling.getAttribute('src');
+            else
+                cur_image_path = event.target.parentElement.previousElementSibling.getAttribute("src");
+            
+            for (let image_path in images_info){
+                if(cur_image_path == image_path){
+                    var prompt = images_info[image_path]['Prompt'];
+                    var negPrompt = images_info[image_path]['Negative_Prompt'];
+                    var n_inference_steps = images_info[image_path]['Inference_Steps'];
+                    var width = images_info[image_path]['Width'];
+                    var height = images_info[image_path]['Height'];
+                    var model = images_info[image_path]["Model_Name"];
+                    break;
+                }
+            }
+            
+            console.log(prompt, negPrompt, n_inference_steps, width, height);
+            document.getElementById("overlay").getElementsByTagName('IMG')[0].setAttribute("src", cur_image_path);
+            document.getElementById("overlay").getElementsByTagName('P')[0].innerHTML = "<span>Prompt: </span>" + prompt;
+            document.getElementById("overlay").getElementsByTagName('P')[1].innerHTML = "<span>Negative Prompt: </span>" + negPrompt;
+            document.getElementById("overlay").getElementsByTagName('P')[2].innerHTML = "<span>Inference Steps: </span>" + n_inference_steps + " | <span>Width: </span>" + width + "px | <span>Height: </span>" + height + "px";
+            document.getElementById("overlay").getElementsByTagName('P')[3].innerHTML = "<span>Model: </span>" + model;
+
+            // Update download button's href
+            document.getElementById('downloadLink').setAttribute('href', "/download?image_path=" + cur_image_path);
+
+            document.getElementById("overlay").style.display = "flex";
+        }
+
+        function overlay_off(){
+            document.getElementById("overlay").style.display = "none";
+        }
+    </script> 
+{% endblock %}
+
+{% block header %}
+    <div class="headerContainer">
+        <div id="navbarLogo">
+            <img width="50%" src="static/images/logo.png" alt="logo">
+        </div>
+        <div class="navbar">
+            <a href="{{url_for('generate_page')}}"><div><p>Stable Diffusion</p></div></a>
+            <a><div><p>Text Generation</p></div></a>
+            <a href="{{url_for('my_account')}}">
+                <div class="myAccountButton">
+                    <img width="36px" height="36px" style="border-radius: 50%;" src="{{avatar_pic_path}}">
+                    <p>{{current_user}}</p>
+                </div>
+            </a>
+        </div>
+    </div>
+{% endblock %}
+    
+{% block content %}
+    <h3>Dashboard</h3>
+    </br>
+    {% for message in get_flashed_messages() %}
+        <div class="alertSuccess">
+            {{message}}
+            <button type="button" class="close" onclick="removeAlert()">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+    <div class="dashboardImages">
+        {% for image_path in images_info %}
+            <div class="generatedImage">
+                <img src="{{image_path}}" alt="{{image_path}}">
+                <div class="imageButtons">
+                    <button class="viewButton" onclick="overlay_on()">
+                        <span class="text">View</span>
+                        <span class="icon">
+                            <img src="{{url_for('static', filename='images/eyeIcon.png')}}" alt="eye_icon">
+                        </span>
+                    </button>
+                    <a href="{{url_for('delete')}}?image_path={{image_path}}">
+                        <button class="deleteButton">
+                            <span class="text">Delete</span>
+                            <span class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                                </svg>
+                            </span>
+                        </button></a>
+                </div>
+                <p id="hidden" style="display: none;"></p>
+            </div>
+        {% endfor %}
+        {% if not images_info %}
+            <div id="noImages">
+                <h3>No generated images</h3>
+                <p>Create images <a href="{{url_for('generate_page')}}">here</a></p>
+            </div>
+        {% endif %}
+    </div>
+    <div id="overlay" onclick="overlay_off()">
+        <div>
+            <img id="selectedImage" src="">
+            <a href="" id="downloadLink"><button>Download</button></a>
+        </div>
+        <div id="imageInfo">
+            <p id="prompt"></p>
+            <p id="negPrompt"></p>
+            <p id="n_inference_steps"></p>
+            <p id="model"></p>
+        </div>
+    </div>
+{% endblock %}
+

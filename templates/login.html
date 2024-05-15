@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %} Log in {% endblock %}
+{% block head %} 
+    {{ super() }}
+    <script>
+        function displayNone(alert) {
+            alert.style.display = "none"
+        }
+        function removeAlert(){
+            alerts = document.getElementsByClassName("alertError");
+            for(let alert of alerts){
+                alert.classList.add("hide");
+                setTimeout(function(){ displayNone(alert) }, 200);
+            }
+        }
+        function removeAlertSucc(){
+            alerts = document.getElementsByClassName("alertSuccess");
+            for(let alert of alerts){
+                alert.classList.add("hide");
+                setTimeout(function(){ displayNone(alert) }, 200);
+            }
+        }
+    </script>
+{% endblock%}
+
+{% block content %}
+    <img class="logRegLogo" src="static/images/logo.png">
+    <div id="loginLine">
+        <h3>Log in</h3>
+    </div>
+    {% if error_message %}
+        <div class="alertError">
+            {{error_message}}
+            <button type="button" class="close" onclick="removeAlert()">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+    {% for message in get_flashed_messages() %}
+        <div class="alertSuccess alertLogin" >
+            {{message}}
+            <button type="button" class="close" onclick="removeAlertSucc()">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+    <form class="logRegForm" action="" method="POST" autocomplete="off">
+        <input name="username" minlength="4" maxlength="40" placeholder="Username" required="" type="text">
+        <br/>
+        <input name="password" minlength="4" maxlength="60" placeholder="Password" required="" type="password">
+        <br/>
+        <div class="logRegButtons"> 
+            <p><a href="{{url_for('register')}}">Don't have account? Sign up here..</a></p>
+            <br/>
+            <input class="loginButton"  name="submit" value="Login" type="submit">
+        </div>
+    </form>
+    {% endblock %}
+
+{ % block footer %}
+    
+{ % endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}My Account{% endblock %}
+{% block head %} 
+    {{super()}} 
+    <script>
+        function showCamera(){
+            document.getElementById("cameraPic").style.display = 'block';
+        }
+        function hideCamera(){
+            document.getElementById("cameraPic").style.display = 'none'
+        }
+    </script>
+{% endblock %}
+
+{% block header %}
+    <div class="headerContainer">
+        <div><img width="50%" src="static/images/logo.png" alt="logo"></div>
+        <div class="navbar">
+            <a href="{{url_for('home_page')}}">
+                <div><p>Dashboard</p></div>
+            </a>
+            <a href="{{url_for('generate_page')}}"><div><p>Stable Diffusion</p></div></a>
+            <a><div><p>Text Generation</p></div></a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <form action="{{url_for('upload')}}" method="POST" enctype="multipart/form-data">
+        <label id="uploadImage" onmouseenter="showCamera()" onmouseleave="hideCamera()">
+            <input type="file" name="file" style="display: none;" accept="image/*" onchange="this.form.submit()">
+            <img class="userLogoBig" src="{{avatar_pic_path}}" alt="ProfilePic">
+            <img id="cameraPic" src="{{url_for('static', filename='images/camera.png')}}">
+        </label>
+    </form>
+    <h3>{{user_info.username}}</h3>
+    <hr/>
+    <div id="accountInfo">
+        <ul>
+            <li><strong>Username:</strong><input type="text" value="{{user_info.username}}" disabled></li>
+            <li><strong>E-mail:</strong><input type="text" value="{{user_info.email}}" disabled></li>
+            <li><strong>Registration date:</strong><input type="text" value="{{user_info.registered}}" disabled></li>
+            <li><strong>Generated images:</strong><input type="text" value="{{num_gen_images}}" disabled></li>
+            <li id="accountButtons">
+                <a href="{{url_for('logout')}}" style="margin-right: 4px;"><button id="logoutButton"><span class="text">Logout</span></button></a>
+                <a href="{{url_for('delete_account')}}"style="margin-left: 4px;"><button id="deleteAccount"><span class="text">Delete account</span></button></a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}

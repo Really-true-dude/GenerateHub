@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Generate{% endblock %}
+{% block head %}
+    {{super()}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        function checkInput() {
+            let prompt = document.getElementsByTagName("textarea")[0];
+            let n_steps = document.getElementsByTagName("input")[0];
+            if (prompt.value.length > 0 && n_steps.value.length > 0)    
+                return true;
+            else   
+                return false;
+        }
+
+        function updateTextBox(val, id){
+            document.getElementById(id).value = val;
+        }
+        function updateRange(val, id) {
+            document.getElementById(id).value = parseInt(val);
+        }
+        function displayLoading() {
+            if(checkInput()){
+                document.getElementsByClassName("loadContainer")[0].style.display = "block";
+                document.getElementsByClassName("imageContainer")[0].getElementsByTagName("img")[0].style.opacity = 0.5;
+            }
+        }
+        function hideLoading() {
+            document.getElementsByClassName("loadContainer")[0].style.display = "none";
+            document.getElementsByClassName("imageContainer")[0].getElementsByTagName("img")[0].style.opacity = 1;
+        }
+
+        $(document).ready(function(){
+            if (window.innerWidth < 900) {
+                document.getElementsByClassName("generateContainer")[0].style.flexWrap = "wrap";
+                document.getElementsByClassName("imageContainer")[0].style.maxHeight = "none";
+                document.getElementsByClassName("imageContainer")[0].style.marginTop = "8px";
+            }
+        });
+
+        window.onresize = function() {
+            if (window.innerWidth <= 900) {
+                document.getElementsByClassName("imageContainer")[0].style.maxHeight = "none";
+                document.getElementsByClassName("generateContainer")[0].style.flexWrap = "wrap";
+                document.getElementsByClassName("imageContainer")[0].style.marginTop = "8px";
+            }
+            else {
+                document.getElementsByClassName("imageContainer")[0].style.maxHeight = "35vw";
+                document.getElementsByClassName("generateContainer")[0].style.flexWrap = "nowrap";
+                document.getElementsByClassName("imageContainer")[0].style.marginTop = "10vh";
+            }
+        }
+
+        
+    </script>
+{% endblock %}
+
+{% block header %}
+    <img class="BigLogo" src="static/images/logo.png" alt="logo">
+    <a class="goBackButton" href="{{url_for('home_page')}}"><button>&lt Back</button></a>
+    </br></br>
+{% endblock %}
+
+{% block content %}
+    <div class="generateContainer">
+        <form action="{{url_for('generating')}}" name="generate" method="POST" autocomplete="off">
+            <h3>Cofiguration</h3>
+            <hr/><br/>
+            <p>Conditional prompt</p>
+            <textarea name="prompt" cols="70" rows="4" required=""></textarea>
+            <p>Negative prompt</p>
+            <textarea name="uncond_prompt" cols="70" rows="4"></textarea>
+            <br/><br/>
+            <!-- <p>Inference Steps</p> -->
+            <label for="n_inference_steps">Inference Steps:</label>
+            <input name="n_inference_steps" type="number" min="1" max="100" required="">
+            </br></br>
+            <label for="widthRange">Width:</label>
+            <input id="widthRange" name="width" value="512"  type="range" min="0" max="1024" onchange="updateTextBox(this.value, 'widthValue')">
+            <input id="widthValue" type="text" size="4" onchange="updateRange(this.value, 'widthRange')">
+            <br/><br/>
+            <label for="heightRange">Height:</label>
+            <input id="heightRange" name="height" value="512" type="range" min="0" max="1024" onchange="updateTextBox(this.value, 'heightValue')">
+            <input id="heightValue" type="text" size="4" onchange="updateRange(this.value, 'heightRange')">
+            </br></br>
+            <label for="models">Select style:</label>
+            <select name="model" id="models">
+                <option value="Anime_Amore">Anime</option>
+                <option value="RealismFusion">Realism</option>
+            </select>
+            </br></br>
+            <div>
+                <input name="Submit" type="submit" value="Generate" onclick="displayLoading()">
+            </div>
+        </form>
+        <div class="imageContainer">
+            {% if image_path %}
+                <img src="{{ image_path }}" width="100%" alt="generated_image" onload="hideLoading()">
+            {% else %}
+                <img src="{{url_for('static', filename='images/camera.png')}}" width="100%" alt="placeholder" >
+            {% endif %}
+            <div class="loadContainer">
+                <div class="loader"></div>
+                <p>Generating image..</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
