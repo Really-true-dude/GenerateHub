@@ -1,3 +1,4 @@
 Flask
 torch
 flask_sqlalchemy
+flask_login
